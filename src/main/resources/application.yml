@@ -4,13 +4,32 @@ server:
 spring:
   application:
     name: application-service
+  mvc:
+    servlet:
+      path: /application-service
   cloud:
     config:
       uri: http://localhost:8888
+  datasource:
+    url: jdbc:mysql://database-1-instance-1.c3ei26ukc461.us-west-1.rds.amazonaws.com:3306/HR_Portal
+    username: admin
+    password: (v?|ABn?aXLuq0Ej<5iX9DgFc:d.
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
 eureka:
+  instance:
+    hostname: localhost
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+
