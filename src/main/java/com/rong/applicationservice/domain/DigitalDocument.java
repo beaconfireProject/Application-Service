@@ -19,7 +19,7 @@ public class DigitalDocument {
     private Integer id;
 
     @Column(name = "EmployeeID")
-    private Integer employeeId;
+    private String employeeId;
 
     @Column(name = "Type")
     private String type;

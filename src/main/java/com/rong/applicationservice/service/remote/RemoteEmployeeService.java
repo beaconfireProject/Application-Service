@@ -1,6 +1,7 @@
 package com.rong.applicationservice.service.remote;
 
 import com.rong.applicationservice.domain.Employee;
+import com.rong.applicationservice.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,7 @@ import java.util.List;
 public interface RemoteEmployeeService {
 
     @PostMapping("/employee-service/api/employee")
-    ResponseEntity<?> createEmployee(Employee employee);
+    ResponseEntity<ApiResponse> createEmployee(Employee employee);
 
     @GetMapping("/employee-service/api/employee")
     ResponseEntity<List<Employee>> getAllEmployees();

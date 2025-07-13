@@ -60,7 +60,7 @@ public class ApplicationService {
                 .comment("Driver License")
                 .createDate(LocalDate.now())
                 .build());
-        ApiResponse apiResponse = (ApiResponse) remoteEmployeeService.createEmployee(Employee.builder()
+        ResponseEntity<ApiResponse> response = remoteEmployeeService.createEmployee(Employee.builder()
                 .firstName(onboardingRequest.getFirstName())
                 .lastName(onboardingRequest.getLastName())
                 .preferredName(onboardingRequest.getPreferredName())
@@ -78,10 +78,10 @@ public class ApplicationService {
                 .address(addressList)
                 .visaStatus(visaStatusList)
                 .personalDocument(personalDocumentList)
-                .build()).getBody();
-        int id = Integer.parseInt(apiResponse.getId().substring(1));
+                .build());
+        ApiResponse apiResponse = response.getBody();
         ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
-                .employeeId(id)
+                .employeeId(apiResponse.getId())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .status("Pending")
@@ -92,7 +92,7 @@ public class ApplicationService {
         personalDocumentList.forEach(
                 personalDocument -> {
                     digitalDocumentDao.add(DigitalDocument.builder()
-                            .employeeId(id)
+                            .employeeId(apiResponse.getId())
                             .type(personalDocument.getTitle())
                             .title(personalDocument.getTitle())
                             .isRequired(true)
@@ -112,8 +112,7 @@ public class ApplicationService {
     }
 
     public Status getOnboardingStatusById(String userId) {
-        int id = Integer.parseInt(userId.substring(1));
-        ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.findByEmployeeIdAndApplicationType(id, "Onboarding");
+        ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.findByEmployeeIdAndApplicationType(userId, "Onboarding");
         return Status.builder().status(applicationWorkFlow.getStatus()).build();
     }
 
@@ -125,7 +124,7 @@ public class ApplicationService {
 
     public ApplicationDetailResponse getOngoingAllInfoByAppId(int applicationId) {
         ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.getOngoingByAppId(applicationId);
-        Employee employee = getEmployeeById("e100" + applicationWorkFlow.getEmployeeId()).getBody();
+        Employee employee = getEmployeeById(applicationWorkFlow.getEmployeeId()).getBody();
         List<DigitalDocument> digitalDocuments = digitalDocumentDao.getAll();
         List<DigitalDocument> documents = digitalDocuments.stream().filter(digitalDocument -> digitalDocument.getEmployeeId().equals(applicationWorkFlow.getEmployeeId())).collect(Collectors.toList());
         return ApplicationDetailResponse.builder()

@@ -16,7 +16,7 @@ public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWork
         setClazz(ApplicationWorkFlow.class);
     }
 
-    public ApplicationWorkFlow findByEmployeeIdAndApplicationType(int id, String onboarding) {
+    public ApplicationWorkFlow findByEmployeeIdAndApplicationType(String id, String onboarding) {
         String hql = "from ApplicationWorkFlow where employeeId=:id and applicationType=:onboarding";
         Query<ApplicationWorkFlow> query = getCurrentSession().createQuery(hql);
         query.setParameter("id", id);

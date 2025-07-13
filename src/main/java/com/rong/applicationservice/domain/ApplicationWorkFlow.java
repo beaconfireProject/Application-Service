@@ -20,7 +20,7 @@ public class ApplicationWorkFlow {
     private Integer id;
 
     @Column(name = "EmployeeID")
-    private Integer employeeId;
+    private String employeeId;
 
     @Column(name = "CreateDate", nullable = false, updatable = false)
     private LocalDateTime createdAt;
