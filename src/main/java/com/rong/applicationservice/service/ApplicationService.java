@@ -2,19 +2,25 @@ package com.rong.applicationservice.service;
 
 import com.rong.applicationservice.dao.ApplicationWorkFlowDao;
 import com.rong.applicationservice.dao.DigitalDocumentDao;
-import com.rong.applicationservice.domain.ApplicationWorkFlow;
-import com.rong.applicationservice.domain.DigitalDocument;
-import com.rong.applicationservice.domain.Employee;
+import com.rong.applicationservice.domain.*;
+import com.rong.applicationservice.dto.request.Comment;
+import com.rong.applicationservice.dto.request.OnboardingRequest;
 import com.rong.applicationservice.dto.response.ApiResponse;
+import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ApplicationService {
 
     private final ApplicationWorkFlowDao applicationWorkFlowDao;
@@ -28,8 +34,51 @@ public class ApplicationService {
         this.digitalDocumentDao = digitalDocumentDao;
     }
 
-    public int createOnboardingApplication(Employee employee) {
-        ApiResponse apiResponse = (ApiResponse) remoteEmployeeService.createEmployee(employee).getBody();
+    public int createOnboardingApplication(OnboardingRequest onboardingRequest) {
+        List<Address> addressList = new ArrayList<>();
+        addressList.add(onboardingRequest.getAddress());
+        List<VisaStatus> visaStatusList = new ArrayList<>();
+        visaStatusList.add(onboardingRequest.getVisaStatus());
+        List<PersonalDocument> personalDocumentList = new ArrayList<>();
+        personalDocumentList.add(PersonalDocument.builder()
+                .path(onboardingRequest.getAvatar())
+                .title("Avatar")
+                .comment("Avatar")
+                .createDate(LocalDate.now())
+                .build());
+        if(onboardingRequest.getWorkDoc() != null) {
+            personalDocumentList.add(PersonalDocument.builder()
+                    .path(onboardingRequest.getWorkDoc())
+                    .title("Work Authorization")
+                    .comment("Work Authorization")
+                    .createDate(LocalDate.now())
+                    .build());
+        }
+        personalDocumentList.add(PersonalDocument.builder()
+                .path(onboardingRequest.getDriverLicense().getLicenseDoc())
+                .title("Driver License")
+                .comment("Driver License")
+                .createDate(LocalDate.now())
+                .build());
+        ApiResponse apiResponse = (ApiResponse) remoteEmployeeService.createEmployee(Employee.builder()
+                .firstName(onboardingRequest.getFirstName())
+                .lastName(onboardingRequest.getLastName())
+                .preferredName(onboardingRequest.getPreferredName())
+                .email(onboardingRequest.getEmail())
+                .cellPhone(onboardingRequest.getCellPhone())
+                .alternatePhone(onboardingRequest.getWorkPhone())
+                .gender(onboardingRequest.getGender())
+                .ssn(onboardingRequest.getSsn())
+                .dob(onboardingRequest.getDob())
+                .startDate(onboardingRequest.getStartDate())
+                .endDate(onboardingRequest.getEndDate())
+                .driverLicense(onboardingRequest.getDriverLicense().getLicenseNumber())
+                .driverLicenseExpiration(onboardingRequest.getDriverLicense().getDriverLicenseExpiration())
+                .contact(onboardingRequest.getContact())
+                .address(addressList)
+                .visaStatus(visaStatusList)
+                .personalDocument(personalDocumentList)
+                .build()).getBody();
         int id = Integer.parseInt(apiResponse.getId().substring(1));
         ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
                 .employeeId(id)
@@ -40,7 +89,7 @@ public class ApplicationService {
                 .applicationType("Onboarding")
                 .build();
         int applicationId = applicationWorkFlowDao.add(applicationWorkFlow);
-        employee.getPersonalDocument().forEach(
+        personalDocumentList.forEach(
                 personalDocument -> {
                     digitalDocumentDao.add(DigitalDocument.builder()
                             .employeeId(id)
@@ -56,5 +105,40 @@ public class ApplicationService {
 
     public ResponseEntity<List<Employee>> getAllEmployee() {
         return remoteEmployeeService.getAllEmployees();
+    }
+
+    public ResponseEntity<Employee> getEmployeeById(String userId) {
+        return remoteEmployeeService.getEmployeeById(userId);
+    }
+
+    public Status getOnboardingStatusById(String userId) {
+        int id = Integer.parseInt(userId.substring(1));
+        ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.findByEmployeeIdAndApplicationType(id, "Onboarding");
+        return Status.builder().status(applicationWorkFlow.getStatus()).build();
+    }
+
+    public List<ApplicationWorkFlow> getAllOngoingApplications() {
+        List<ApplicationWorkFlow> all =applicationWorkFlowDao.getAll();
+        log.info(all.toString());
+        return all.stream().filter(applicationWorkFlow -> !applicationWorkFlow.getStatus().equals("Completed")).collect(Collectors.toList());
+    }
+
+    public ApplicationDetailResponse getOngoingAllInfoByAppId(int applicationId) {
+        ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.getOngoingByAppId(applicationId);
+        Employee employee = getEmployeeById("e100" + applicationWorkFlow.getEmployeeId()).getBody();
+        List<DigitalDocument> digitalDocuments = digitalDocumentDao.getAll();
+        List<DigitalDocument> documents = digitalDocuments.stream().filter(digitalDocument -> digitalDocument.getEmployeeId().equals(applicationWorkFlow.getEmployeeId())).collect(Collectors.toList());
+        return ApplicationDetailResponse.builder()
+                .applicationWorkFlow(applicationWorkFlow)
+                .employee(employee)
+                .digitalDocuments(documents)
+                .build();
+    }
+
+    public void updateStatus(int applicationId, String status, Comment comment) {
+        ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
+        app.setStatus(status);
+        app.setComment(comment.getComment());
+        applicationWorkFlowDao.updateStatus(app);
     }
 }
