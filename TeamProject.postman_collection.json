@@ -1,0 +1,124 @@
+{
+	"info": {
+		"_postman_id": "8258f956-2788-4809-9065-028e832ea76a",
+		"name": "TeamProject",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45455389",
+		"_collection_link": "https://rongjima.postman.co/workspace/Rongji-Ma's-Workspace~a4289f6e-9416-4e88-8a4e-3aa43e7c3adb/collection/45455389-8258f956-2788-4809-9065-028e832ea76a?action=share&source=collection_link&creator=45455389"
+	},
+	"item": [
+		{
+			"name": "registration",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZXMiOlt7ImF1dGhvcml0eSI6InVzZXIifV19.5UQielcfW50djSKridlzUKNvrDoVoV5FqA9MESxwQaE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \t\"username\": \"test1\",\r\n  \t\"password\": \"123456\",\r\n\t\"email\": \"test1@abc.com\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Onboarding",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZXMiOlt7ImF1dGhvcml0eSI6InVzZXIifV19.5UQielcfW50djSKridlzUKNvrDoVoV5FqA9MESxwQaE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstname\": \"Alice\",\r\n  \"lastname\": \"Bob\",\r\n  \"middlename\": \"\",\r\n  \"preferredname\": \"AB\",\r\n  \"currentAddress\": {\r\n    \"street\": \"3203 asdjnc Rd\",\r\n    \"apt#\": \"\",\r\n    \"city\": \"village\",\r\n    \"state\": \"PT\",\r\n    \"country\": \"USK\"\r\n  },\r\n  \"cellPhone\": \"123-456-7890\",\r\n  \"workPhone\": \"456-789-1230\",\r\n  \"email\": \"test1@abc.com\",\r\n  \"SSN\": \"012-345-6789\",\r\n  \"dateOfBirth\": \"02/26/1986\",\r\n  \"gender\": \"male\",\r\n  \"idStatus\": \"H1-B\",\r\n  \"startDate\": \"01/03/2025\",\r\n  \"endDate\": \"01/02/2035\",\r\n  \"workDoc\": \"url\",\r\n  \"driverLicense\": {\r\n    \"license#\": \"K32303132043160310\",\r\n    \"expirationDate\": \"03/26/2029\",\r\n    \"licenseCopy\": \"url\"\r\n  },\r\n  \"reference\": {\r\n    \"firstname\": \"Coc\",\r\n    \"lastname\": \"Dod\",\r\n    \"middlename\": \"\",\r\n    \"phone\": \"031-230-5630\",\r\n    \"email\": \"test2@askmdn.com\",\r\n    \"Relationship\": \"TA\"\r\n  },\r\n  \"emergencyContact\": [\r\n    {\r\n      \"firstname\": \"Goc\",\r\n      \"lastname\": \"Cod\",\r\n      \"middlename\": \"\",\r\n      \"phone\": \"031-230-5630\",\r\n      \"email\": \"test2@askmdn.com\",\r\n      \"Relationship\": \"Mother\"\r\n    },\r\n    {\r\n      \"firstname\": \"Ock\",\r\n      \"lastname\": \"Plc\",\r\n      \"middlename\": \"\",\r\n      \"phone\": \"031-230-6231\",\r\n      \"email\": \"test3@askmdasdjio.com\",\r\n      \"Relationship\": \"Father\"\r\n    }\r\n  ]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/onboarding",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"onboarding"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getOnboardById",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "getStatus",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "getAllOngoingApplication",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "getapplicationDetail",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
