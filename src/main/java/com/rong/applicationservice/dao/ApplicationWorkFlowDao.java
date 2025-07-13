@@ -7,6 +7,7 @@ import org.hibernate.query.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -31,8 +32,13 @@ public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWork
         return query.getSingleResult();
     }
 
-    public void updateStatus(ApplicationWorkFlow app) {
+    public void updateStatus(int applicationId, String status, String comment) {
         Session session = getCurrentSession();
-        session.update(app);
+        Query query = session.createQuery("UPDATE ApplicationWorkFlow SET status = :status, comment = :comment, updatedAt = :modDate WHERE id = :applicationId");
+        query.setParameter("status", status);
+        query.setParameter("comment", comment);
+        query.setParameter("modDate", LocalDateTime.now());
+        query.setParameter("applicationId", applicationId);
+        query.executeUpdate();
     }
 }

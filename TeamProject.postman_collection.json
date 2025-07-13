@@ -119,6 +119,22 @@
 				"header": []
 			},
 			"response": []
+		},
+		{
+			"name": "uploadStatus",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "getalldocs",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
 		}
 	]
 }

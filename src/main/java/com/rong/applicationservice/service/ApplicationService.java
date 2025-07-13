@@ -7,11 +7,13 @@ import com.rong.applicationservice.dto.request.Comment;
 import com.rong.applicationservice.dto.request.OnboardingRequest;
 import com.rong.applicationservice.dto.response.ApiResponse;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
+import com.rong.applicationservice.exception.StatusDuplicateException;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -134,10 +136,19 @@ public class ApplicationService {
                 .build();
     }
 
+
+    @Transactional
     public void updateStatus(int applicationId, String status, Comment comment) {
+        log.info(applicationId + ":" + status + ":" + comment.getComment());
         ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
-        app.setStatus(status);
-        app.setComment(comment.getComment());
-        applicationWorkFlowDao.updateStatus(app);
+        if (!app.getStatus().equals(status) && !app.getStatus().equals("Completed")) {
+            applicationWorkFlowDao.updateStatus(applicationId, status, comment.getComment());
+        } else{
+            throw new StatusDuplicateException("Status already exists");
+        }
+    }
+
+    public List<DigitalDocument> getAllDocuments() {
+        return digitalDocumentDao.getAll();
     }
 }

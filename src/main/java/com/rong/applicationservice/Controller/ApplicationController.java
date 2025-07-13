@@ -1,6 +1,7 @@
 package com.rong.applicationservice.Controller;
 
 import com.rong.applicationservice.domain.ApplicationWorkFlow;
+import com.rong.applicationservice.domain.DigitalDocument;
 import com.rong.applicationservice.domain.Employee;
 import com.rong.applicationservice.domain.Status;
 import com.rong.applicationservice.dto.request.Comment;
@@ -26,7 +27,7 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @PostMapping("/onboarding/")
+    @PostMapping("/onboarding")
     public GeneralResponse createOnboardingApplication(@RequestBody OnboardingRequest onboardingRequest) {
         int id = applicationService.createOnboardingApplication(onboardingRequest);
         return ResponseSuccess.builder()
@@ -88,4 +89,14 @@ public class ApplicationController {
                 .build();
     }
 
+    @GetMapping("/documents")
+    public GeneralResponse getAllDocuments(){
+        List<DigitalDocument> digitalDocuments = applicationService.getAllDocuments();
+        return ResponseSuccess.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .data(digitalDocuments)
+                .message("get all documents successfully")
+                .build();
+    }
 }
