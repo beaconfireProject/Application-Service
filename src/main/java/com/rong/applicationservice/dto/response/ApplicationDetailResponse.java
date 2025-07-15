@@ -15,6 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ApplicationDetailResponse {
     private ApplicationWorkFlow applicationWorkFlow;
-    private Employee employee;
+    private Object employee;
     private List<DigitalDocument> digitalDocuments;
 }

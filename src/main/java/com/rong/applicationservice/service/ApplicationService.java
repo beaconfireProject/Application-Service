@@ -1,5 +1,7 @@
 package com.rong.applicationservice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rong.applicationservice.dao.ApplicationWorkFlowDao;
 import com.rong.applicationservice.dao.DigitalDocumentDao;
 import com.rong.applicationservice.domain.*;
@@ -7,13 +9,16 @@ import com.rong.applicationservice.dto.request.Comment;
 import com.rong.applicationservice.dto.request.OnboardingRequest;
 import com.rong.applicationservice.dto.response.ApiResponse;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
+import com.rong.applicationservice.dto.response.DtoResponse;
 import com.rong.applicationservice.exception.StatusDuplicateException;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,13 +32,15 @@ public class ApplicationService {
 
     private final ApplicationWorkFlowDao applicationWorkFlowDao;
     private final DigitalDocumentDao digitalDocumentDao;
+    private final RestTemplate restTemplate;
     private RemoteEmployeeService remoteEmployeeService;
 
     @Autowired
-    public ApplicationService(RemoteEmployeeService remoteEmployeeService, ApplicationWorkFlowDao applicationWorkFlowDao, DigitalDocumentDao digitalDocumentDao) {
+    public ApplicationService(RemoteEmployeeService remoteEmployeeService, ApplicationWorkFlowDao applicationWorkFlowDao, DigitalDocumentDao digitalDocumentDao, RestTemplate restTemplate) {
         this.remoteEmployeeService = remoteEmployeeService;
         this.applicationWorkFlowDao = applicationWorkFlowDao;
         this.digitalDocumentDao = digitalDocumentDao;
+        this.restTemplate = restTemplate;
     }
 
     public int createOnboardingApplication(OnboardingRequest onboardingRequest) {
@@ -62,7 +69,7 @@ public class ApplicationService {
                 .comment("Driver License")
                 .createDate(LocalDate.now())
                 .build());
-        ResponseEntity<ApiResponse> response = remoteEmployeeService.createEmployee(Employee.builder()
+        ResponseEntity<DtoResponse> response = remoteEmployeeService.createEmployee(Employee.builder()
                 .firstName(onboardingRequest.getFirstName())
                 .lastName(onboardingRequest.getLastName())
                 .preferredName(onboardingRequest.getPreferredName())
@@ -81,9 +88,10 @@ public class ApplicationService {
                 .visaStatus(visaStatusList)
                 .personalDocument(personalDocumentList)
                 .build());
-        ApiResponse apiResponse = response.getBody();
+        DtoResponse dtoResponse = response.getBody();
+
         ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
-                .employeeId(apiResponse.getId())
+                .employeeId((String) dtoResponse.getData())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .status("Pending")
@@ -94,7 +102,7 @@ public class ApplicationService {
         personalDocumentList.forEach(
                 personalDocument -> {
                     digitalDocumentDao.add(DigitalDocument.builder()
-                            .employeeId(apiResponse.getId())
+                            .employeeId((String) dtoResponse.getData())
                             .type(personalDocument.getTitle())
                             .title(personalDocument.getTitle())
                             .isRequired(true)
@@ -105,11 +113,11 @@ public class ApplicationService {
         return applicationId;
     }
 
-    public ResponseEntity<List<Employee>> getAllEmployee() {
+    public ResponseEntity<DtoResponse> getAllEmployee() {
         return remoteEmployeeService.getAllEmployees();
     }
 
-    public ResponseEntity<Employee> getEmployeeById(String userId) {
+    public ResponseEntity<DtoResponse> getEmployeeById(String userId) {
         return remoteEmployeeService.getEmployeeById(userId);
     }
 
@@ -126,12 +134,15 @@ public class ApplicationService {
 
     public ApplicationDetailResponse getOngoingAllInfoByAppId(int applicationId) {
         ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.getOngoingByAppId(applicationId);
-        Employee employee = getEmployeeById(applicationWorkFlow.getEmployeeId()).getBody();
+//        ResponseEntity<DtoResponse> response = restTemplate.exchange("http://employee-service/api/employees/{id}", HttpMethod.GET, null, DtoResponse.class, applicationWorkFlow.getEmployeeId());
+        ResponseEntity<DtoResponse> dtoResponse = getEmployeeById(applicationWorkFlow.getEmployeeId());
+        DtoResponse response = dtoResponse.getBody();
+        Object body = response.getData();
         List<DigitalDocument> digitalDocuments = digitalDocumentDao.getAll();
         List<DigitalDocument> documents = digitalDocuments.stream().filter(digitalDocument -> digitalDocument.getEmployeeId().equals(applicationWorkFlow.getEmployeeId())).collect(Collectors.toList());
         return ApplicationDetailResponse.builder()
                 .applicationWorkFlow(applicationWorkFlow)
-                .employee(employee)
+                .employee(body)
                 .digitalDocuments(documents)
                 .build();
     }

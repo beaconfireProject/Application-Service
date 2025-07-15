@@ -6,10 +6,7 @@ import com.rong.applicationservice.domain.Employee;
 import com.rong.applicationservice.domain.Status;
 import com.rong.applicationservice.dto.request.Comment;
 import com.rong.applicationservice.dto.request.OnboardingRequest;
-import com.rong.applicationservice.dto.response.ApplicationDataResponse;
-import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
-import com.rong.applicationservice.dto.response.GeneralResponse;
-import com.rong.applicationservice.dto.response.ResponseSuccess;
+import com.rong.applicationservice.dto.response.*;
 import com.rong.applicationservice.service.ApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +35,12 @@ public class ApplicationController {
     }
 
     @GetMapping("/employee")
-    public ResponseEntity<List<Employee>> getAllEmployee() {
+    public ResponseEntity<DtoResponse> getAllEmployee() {
         return applicationService.getAllEmployee();
     }
 
     @GetMapping("/onboarding/{userId}")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable String userId) {
+    public ResponseEntity<DtoResponse> getEmployeeById(@PathVariable String userId) {
         return applicationService.getEmployeeById(userId);
     }
 
