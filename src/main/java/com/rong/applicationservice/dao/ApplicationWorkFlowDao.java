@@ -1,14 +1,11 @@
 package com.rong.applicationservice.dao;
 
 import com.rong.applicationservice.domain.ApplicationWorkFlow;
-import com.rong.applicationservice.domain.Status;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Repository
 public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWorkFlow> {

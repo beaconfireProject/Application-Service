@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 
 
 @Configuration
-@PropertySource("classpath:text.txt")
+@PropertySource("classpath:text.text")
 @Getter
 @Setter
 public class HibernateProperty {

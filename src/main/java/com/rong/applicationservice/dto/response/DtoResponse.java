@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DtoResponse {
+public class DtoResponse<T> {
     private boolean success;
     private LocalDateTime timestamp;
-    private Object data;
+    private T data;
     private String message;
 }

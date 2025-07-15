@@ -1,24 +1,20 @@
 package com.rong.applicationservice.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rong.applicationservice.dao.ApplicationWorkFlowDao;
 import com.rong.applicationservice.dao.DigitalDocumentDao;
 import com.rong.applicationservice.domain.*;
 import com.rong.applicationservice.dto.request.Comment;
 import com.rong.applicationservice.dto.request.OnboardingRequest;
-import com.rong.applicationservice.dto.response.ApiResponse;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
 import com.rong.applicationservice.dto.response.DtoResponse;
+import com.rong.applicationservice.exception.EmployeeException;
 import com.rong.applicationservice.exception.StatusDuplicateException;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,18 +28,16 @@ public class ApplicationService {
 
     private final ApplicationWorkFlowDao applicationWorkFlowDao;
     private final DigitalDocumentDao digitalDocumentDao;
-    private final RestTemplate restTemplate;
     private RemoteEmployeeService remoteEmployeeService;
 
     @Autowired
-    public ApplicationService(RemoteEmployeeService remoteEmployeeService, ApplicationWorkFlowDao applicationWorkFlowDao, DigitalDocumentDao digitalDocumentDao, RestTemplate restTemplate) {
+    public ApplicationService(RemoteEmployeeService remoteEmployeeService, ApplicationWorkFlowDao applicationWorkFlowDao, DigitalDocumentDao digitalDocumentDao) {
         this.remoteEmployeeService = remoteEmployeeService;
         this.applicationWorkFlowDao = applicationWorkFlowDao;
         this.digitalDocumentDao = digitalDocumentDao;
-        this.restTemplate = restTemplate;
     }
 
-    public int createOnboardingApplication(OnboardingRequest onboardingRequest) {
+    public int createOnboardingApplication(OnboardingRequest onboardingRequest, Long userId) {
         List<Address> addressList = new ArrayList<>();
         addressList.add(onboardingRequest.getAddress());
         List<VisaStatus> visaStatusList = new ArrayList<>();
@@ -69,56 +63,63 @@ public class ApplicationService {
                 .comment("Driver License")
                 .createDate(LocalDate.now())
                 .build());
-        ResponseEntity<DtoResponse> response = remoteEmployeeService.createEmployee(Employee.builder()
-                .firstName(onboardingRequest.getFirstName())
-                .lastName(onboardingRequest.getLastName())
-                .preferredName(onboardingRequest.getPreferredName())
-                .email(onboardingRequest.getEmail())
-                .cellPhone(onboardingRequest.getCellPhone())
-                .alternatePhone(onboardingRequest.getWorkPhone())
-                .gender(onboardingRequest.getGender())
-                .ssn(onboardingRequest.getSsn())
-                .dob(onboardingRequest.getDob())
-                .startDate(onboardingRequest.getStartDate())
-                .endDate(onboardingRequest.getEndDate())
-                .driverLicense(onboardingRequest.getDriverLicense().getLicenseNumber())
-                .driverLicenseExpiration(onboardingRequest.getDriverLicense().getDriverLicenseExpiration())
-                .contact(onboardingRequest.getContact())
-                .address(addressList)
-                .visaStatus(visaStatusList)
-                .personalDocument(personalDocumentList)
-                .build());
-        DtoResponse dtoResponse = response.getBody();
-
-        ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
-                .employeeId((String) dtoResponse.getData())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .status("Pending")
-                .comment("Awaiting HR review.")
-                .applicationType("Onboarding")
-                .build();
-        int applicationId = applicationWorkFlowDao.add(applicationWorkFlow);
-        personalDocumentList.forEach(
-                personalDocument -> {
-                    digitalDocumentDao.add(DigitalDocument.builder()
-                            .employeeId((String) dtoResponse.getData())
-                            .type(personalDocument.getTitle())
-                            .title(personalDocument.getTitle())
-                            .isRequired(true)
-                            .path(personalDocument.getPath())
-                            .description(personalDocument.getComment())
-                            .build());
-                });
-        return applicationId;
+        try {
+            ResponseEntity<DtoResponse<String>> response = remoteEmployeeService.createEmployee(Employee.builder()
+                    .userId(userId.toString())
+                    .firstName(onboardingRequest.getFirstName())
+                    .lastName(onboardingRequest.getLastName())
+                    .preferredName(onboardingRequest.getPreferredName())
+                    .email(onboardingRequest.getEmail())
+                    .cellPhone(onboardingRequest.getCellPhone())
+                    .alternatePhone(onboardingRequest.getWorkPhone())
+                    .gender(onboardingRequest.getGender())
+                    .ssn(onboardingRequest.getSsn())
+                    .dob(onboardingRequest.getDob())
+                    .startDate(onboardingRequest.getStartDate())
+                    .endDate(onboardingRequest.getEndDate())
+                    .driverLicense(onboardingRequest.getDriverLicense().getLicenseNumber())
+                    .driverLicenseExpiration(onboardingRequest.getDriverLicense().getDriverLicenseExpiration())
+                    .contact(onboardingRequest.getContact())
+                    .address(addressList)
+                    .visaStatus(visaStatusList)
+                    .personalDocument(personalDocumentList)
+                    .build());
+            ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
+                    .employeeId(response.getBody().getData())
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .status("Pending")
+                    .comment("Awaiting HR review.")
+                    .applicationType("Onboarding")
+                    .build();
+            int applicationId = applicationWorkFlowDao.add(applicationWorkFlow);
+            personalDocumentList.forEach(
+                    personalDocument -> {
+                        digitalDocumentDao.add(DigitalDocument.builder()
+                                .employeeId(response.getBody().getData())
+                                .type(personalDocument.getTitle())
+                                .title(personalDocument.getTitle())
+                                .isRequired(true)
+                                .path(personalDocument.getPath())
+                                .description(personalDocument.getComment())
+                                .build());
+                    });
+            return applicationId;
+        } catch (Exception e){
+            throw new EmployeeException("Failed to create onboarding application");
+        }
     }
 
-    public ResponseEntity<DtoResponse> getAllEmployee() {
+    public ResponseEntity<DtoResponse<List<Employee>>> getAllEmployee() {
         return remoteEmployeeService.getAllEmployees();
     }
 
-    public ResponseEntity<DtoResponse> getEmployeeById(String userId) {
-        return remoteEmployeeService.getEmployeeById(userId);
+    public ResponseEntity<DtoResponse<Employee>> getEmployeeById(String userId) {
+        try {
+            return remoteEmployeeService.getEmployeeById(userId);
+        } catch (Exception e){
+            throw new EmployeeException("Failed to get employee by id");
+        }
     }
 
     public Status getOnboardingStatusById(String userId) {
@@ -134,15 +135,14 @@ public class ApplicationService {
 
     public ApplicationDetailResponse getOngoingAllInfoByAppId(int applicationId) {
         ApplicationWorkFlow applicationWorkFlow = applicationWorkFlowDao.getOngoingByAppId(applicationId);
-//        ResponseEntity<DtoResponse> response = restTemplate.exchange("http://employee-service/api/employees/{id}", HttpMethod.GET, null, DtoResponse.class, applicationWorkFlow.getEmployeeId());
-        ResponseEntity<DtoResponse> dtoResponse = getEmployeeById(applicationWorkFlow.getEmployeeId());
-        DtoResponse response = dtoResponse.getBody();
-        Object body = response.getData();
+        ResponseEntity<DtoResponse<Employee>> dtoResponse = getEmployeeById(applicationWorkFlow.getEmployeeId());
+        DtoResponse<Employee> response = dtoResponse.getBody();
+        Employee employee = response.getData();
         List<DigitalDocument> digitalDocuments = digitalDocumentDao.getAll();
         List<DigitalDocument> documents = digitalDocuments.stream().filter(digitalDocument -> digitalDocument.getEmployeeId().equals(applicationWorkFlow.getEmployeeId())).collect(Collectors.toList());
         return ApplicationDetailResponse.builder()
                 .applicationWorkFlow(applicationWorkFlow)
-                .employee(body)
+                .employee(employee)
                 .digitalDocuments(documents)
                 .build();
     }
