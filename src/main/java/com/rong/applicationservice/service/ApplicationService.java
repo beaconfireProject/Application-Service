@@ -8,7 +8,7 @@ import com.rong.applicationservice.dto.request.OnboardingRequest;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
 import com.rong.applicationservice.dto.response.DtoResponse;
 import com.rong.applicationservice.exception.EmployeeException;
-import com.rong.applicationservice.exception.StatusDuplicateException;
+import com.rong.applicationservice.exception.StatusException;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,11 +151,20 @@ public class ApplicationService {
     @Transactional
     public void updateStatus(int applicationId, String status, Comment comment) {
         log.info(applicationId + ":" + status + ":" + comment.getComment());
-        ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
-        if (!app.getStatus().equals(status) && !app.getStatus().equals("Completed")) {
-            applicationWorkFlowDao.updateStatus(applicationId, status, comment.getComment());
-        } else{
-            throw new StatusDuplicateException("Status already exists");
+        List<String> statusList = new ArrayList<>();
+        statusList.add("Completed");
+        statusList.add("Pending");
+        statusList.add("Approved");
+        statusList.add("Rejected");
+        if(!statusList.contains(status)) {
+            throw new StatusException("Status does not exist");
+        }else {
+            ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
+            if (!app.getStatus().equals(status) && !app.getStatus().equals("Completed")) {
+                applicationWorkFlowDao.updateStatus(applicationId, status, comment.getComment());
+            } else {
+                throw new StatusException("Status already exists or completed");
+            }
         }
     }
 

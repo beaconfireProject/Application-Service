@@ -1,5 +1,6 @@
 package com.rong.applicationservice.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
+@Slf4j
 public class HibernateConfig {
 
     HibernateProperty hibernateProperty;
@@ -31,6 +33,9 @@ public class HibernateConfig {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(hibernateProperty.getDriver());
+        log.info(hibernateProperty.getUrl());
+        log.info(hibernateProperty.getUsername());
+        log.info(hibernateProperty.getPassword());
         dataSource.setUrl(hibernateProperty.getUrl());
         dataSource.setUsername(hibernateProperty.getUsername());
         dataSource.setPassword(hibernateProperty.getPassword());

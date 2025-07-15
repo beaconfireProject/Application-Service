@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = StatusDuplicateException.class)
-    public ResponseEntity<GeneralResponse> statusExceptionHandler(StatusDuplicateException statusDuplicateException) {
+    @ExceptionHandler(value = StatusException.class)
+    public ResponseEntity<GeneralResponse> statusExceptionHandler(StatusException statusException) {
         GeneralResponse generalResponse = ResponseFail.builder()
                 .success(false)
                 .time(LocalDateTime.now())
                 .error("Bad Request")
-                .message(statusDuplicateException.getMessage())
+                .message(statusException.getMessage())
                 .status(403)
                 .build();
         return ResponseEntity.status(403).body(generalResponse);

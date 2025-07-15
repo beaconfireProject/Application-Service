@@ -22,8 +22,10 @@ public class ApplicationServiceApplication {
         System.setProperty("spring.datasource.password", dotenv.get("DB_PASSWORD"));
 
         // Only import the ones you need
-        System.setProperty("jwt.secret", dotenv.get("JWT_SECRET_KEY"));
-        log.info("");
+        log.info(System.getProperty("spring.datasource.url"));
+        log.info(System.getProperty("spring.datasource.username"));
+        log.info(System.getProperty("spring.datasource.password"));
+//        log.info(System.getProperty("jwt.secret"));
         SpringApplication.run(ApplicationServiceApplication.class, args);
     }
 
