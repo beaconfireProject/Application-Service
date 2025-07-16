@@ -7,11 +7,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class OnboardingRequest {
-    private String employeeId;
-    private LocalDateTime createDate;
+public class TimeRequest {
     private LocalDateTime lastModificationDate;
-    private String status;
-    private String comment;
-    private String applicationType;
 }

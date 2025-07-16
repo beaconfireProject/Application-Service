@@ -4,8 +4,7 @@ import com.rong.applicationservice.domain.ApplicationWorkFlow;
 import com.rong.applicationservice.domain.DigitalDocument;
 import com.rong.applicationservice.domain.Employee;
 import com.rong.applicationservice.domain.Status;
-import com.rong.applicationservice.dto.request.Comment;
-import com.rong.applicationservice.dto.request.OnboardingRequest;
+import com.rong.applicationservice.dto.request.*;
 import com.rong.applicationservice.dto.response.*;
 import com.rong.applicationservice.exception.ApplicationNotFoundException;
 import com.rong.applicationservice.exception.AuthorizationNotFoundException;
@@ -53,7 +52,7 @@ public class ApplicationController {
         }
     }
 
-    @PostMapping("/onboarding")
+    @PostMapping
     @PreAuthorize("hasAuthority('EMPLOYEE')")
     public GeneralResponse createOnboardingApplication(@RequestBody OnboardingRequest onboardingRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -62,7 +61,7 @@ public class ApplicationController {
             if (userIdObj instanceof Long) {
                 Long userId = (Long) userIdObj;
                 log.info("User ID from JWT token: {}", userId);
-                int id = applicationService.createOnboardingApplication(onboardingRequest, userId);
+                int id = applicationService.createOnboardingApplication(onboardingRequest);
                 return ResponseSuccess.builder()
                         .success(true)
                         .time(LocalDateTime.now())
@@ -144,10 +143,43 @@ public class ApplicationController {
         }
     }
 
-    @PatchMapping("/onboarding/application/{applicationId}/{status}")
+//    @PatchMapping("/onboarding/application/{applicationId}/{status}")
+//    @PreAuthorize("hasAuthority('HR')")
+//    public GeneralResponse updateOnboardingApplication(@PathVariable int applicationId, @PathVariable String status, @RequestBody Comment comment) {
+//        applicationService.updateStatus(applicationId, status, comment);
+//        return ResponseSuccess.builder()
+//                .success(true)
+//                .time(LocalDateTime.now())
+//                .message("update application successfully")
+//                .build();
+//    }
+
+    @PatchMapping("/{applicationId}/time")
     @PreAuthorize("hasAuthority('HR')")
-    public GeneralResponse updateOnboardingApplication(@PathVariable int applicationId, @PathVariable String status, @RequestBody Comment comment) {
-        applicationService.updateStatus(applicationId, status, comment);
+    public GeneralResponse updateTime(@PathVariable int applicationId, @RequestBody TimeRequest timeRequest){
+        applicationService.updateTime(applicationId, timeRequest);
+        return ResponseSuccess.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .message("update application successfully")
+                .build();
+    }
+
+    @PatchMapping("/{applicationId}/status")
+    @PreAuthorize("hasAuthority('HR')")
+    public GeneralResponse updateStatus(@PathVariable int applicationId, @RequestBody StatusRequest statusRequest){
+        applicationService.updateStatus(applicationId, statusRequest);
+        return ResponseSuccess.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .message("update application successfully")
+                .build();
+    }
+
+    @PatchMapping("/{applicationId}/comment")
+    @PreAuthorize("hasAuthority('HR')")
+    public GeneralResponse updateComment(@PathVariable int applicationId, @RequestBody CommentRequest commentRequest){
+        applicationService.updateComment(applicationId, commentRequest);
         return ResponseSuccess.builder()
                 .success(true)
                 .time(LocalDateTime.now())

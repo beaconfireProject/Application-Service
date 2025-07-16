@@ -29,13 +29,8 @@ public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWork
         return query.getSingleResult();
     }
 
-    public void updateStatus(int applicationId, String status, String comment) {
+    public void update(ApplicationWorkFlow app) {
         Session session = getCurrentSession();
-        Query query = session.createQuery("UPDATE ApplicationWorkFlow SET status = :status, comment = :comment, updatedAt = :modDate WHERE id = :applicationId");
-        query.setParameter("status", status);
-        query.setParameter("comment", comment);
-        query.setParameter("modDate", LocalDateTime.now());
-        query.setParameter("applicationId", applicationId);
-        query.executeUpdate();
+        session.update(app);
     }
 }

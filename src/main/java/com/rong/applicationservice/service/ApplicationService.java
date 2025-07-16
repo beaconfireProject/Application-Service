@@ -3,8 +3,7 @@ package com.rong.applicationservice.service;
 import com.rong.applicationservice.dao.ApplicationWorkFlowDao;
 import com.rong.applicationservice.dao.DigitalDocumentDao;
 import com.rong.applicationservice.domain.*;
-import com.rong.applicationservice.dto.request.Comment;
-import com.rong.applicationservice.dto.request.OnboardingRequest;
+import com.rong.applicationservice.dto.request.*;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
 import com.rong.applicationservice.dto.response.DtoResponse;
 import com.rong.applicationservice.exception.EmployeeException;
@@ -16,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,77 +34,104 @@ public class ApplicationService {
         this.digitalDocumentDao = digitalDocumentDao;
     }
 
-    public int createOnboardingApplication(OnboardingRequest onboardingRequest, Long userId) {
-        List<Address> addressList = new ArrayList<>();
-        addressList.add(onboardingRequest.getAddress());
-        List<VisaStatus> visaStatusList = new ArrayList<>();
-        visaStatusList.add(onboardingRequest.getVisaStatus());
-        List<PersonalDocument> personalDocumentList = new ArrayList<>();
-        personalDocumentList.add(PersonalDocument.builder()
-                .path(onboardingRequest.getAvatar())
-                .title("Avatar")
-                .comment("Avatar")
-                .createDate(LocalDate.now())
-                .build());
-        if(onboardingRequest.getWorkDoc() != null) {
-            personalDocumentList.add(PersonalDocument.builder()
-                    .path(onboardingRequest.getWorkDoc())
-                    .title("Work Authorization")
-                    .comment("Work Authorization")
-                    .createDate(LocalDate.now())
-                    .build());
-        }
-        personalDocumentList.add(PersonalDocument.builder()
-                .path(onboardingRequest.getDriverLicense().getLicenseDoc())
-                .title("Driver License")
-                .comment("Driver License")
-                .createDate(LocalDate.now())
-                .build());
-        try {
-            ResponseEntity<DtoResponse<String>> response = remoteEmployeeService.createEmployee(Employee.builder()
-                    .userId(userId.toString())
-                    .firstName(onboardingRequest.getFirstName())
-                    .lastName(onboardingRequest.getLastName())
-                    .preferredName(onboardingRequest.getPreferredName())
-                    .email(onboardingRequest.getEmail())
-                    .cellPhone(onboardingRequest.getCellPhone())
-                    .alternatePhone(onboardingRequest.getWorkPhone())
-                    .gender(onboardingRequest.getGender())
-                    .ssn(onboardingRequest.getSsn())
-                    .dob(onboardingRequest.getDob())
-                    .startDate(onboardingRequest.getStartDate())
-                    .endDate(onboardingRequest.getEndDate())
-                    .driverLicense(onboardingRequest.getDriverLicense().getLicenseNumber())
-                    .driverLicenseExpiration(onboardingRequest.getDriverLicense().getDriverLicenseExpiration())
-                    .contact(onboardingRequest.getContact())
-                    .address(addressList)
-                    .visaStatus(visaStatusList)
-                    .personalDocument(personalDocumentList)
-                    .build());
+    @Transactional
+    public int createOnboardingApplication(OnboardingRequest onboardingRequest) {
+        if (checkStatus(onboardingRequest.getStatus()) && checkType(onboardingRequest.getApplicationType())) {
             ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
-                    .employeeId(response.getBody().getData())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .status("Pending")
-                    .comment("Awaiting HR review.")
-                    .applicationType("Onboarding")
-                    .build();
-            int applicationId = applicationWorkFlowDao.add(applicationWorkFlow);
-            personalDocumentList.forEach(
-                    personalDocument -> {
-                        digitalDocumentDao.add(DigitalDocument.builder()
-                                .employeeId(response.getBody().getData())
-                                .type(personalDocument.getTitle())
-                                .title(personalDocument.getTitle())
-                                .isRequired(true)
-                                .path(personalDocument.getPath())
-                                .description(personalDocument.getComment())
-                                .build());
-                    });
-            return applicationId;
-        } catch (Exception e){
-            throw new EmployeeException("Failed to create onboarding application");
+                    .employeeId(onboardingRequest.getEmployeeId())
+                    .createdAt(onboardingRequest.getCreateDate())
+                    .updatedAt(onboardingRequest.getLastModificationDate())
+                    .status(onboardingRequest.getStatus())
+                    .comment(onboardingRequest.getComment())
+                    .applicationType(onboardingRequest.getApplicationType()).build();
+            int id = applicationWorkFlowDao.add(applicationWorkFlow);
+            return id;
+        } else{
+            throw new StatusException("Application type or status does not exist");
         }
+//        List<Address> addressList = new ArrayList<>();
+//        addressList.add(onboardingRequest.getAddress());
+//        List<VisaStatus> visaStatusList = new ArrayList<>();
+//        visaStatusList.add(onboardingRequest.getVisaStatus());
+//        List<PersonalDocument> personalDocumentList = new ArrayList<>();
+//        personalDocumentList.add(PersonalDocument.builder()
+//                .path(onboardingRequest.getAvatar())
+//                .title("Avatar")
+//                .comment("Avatar")
+//                .createDate(LocalDate.now())
+//                .build());
+//        if(onboardingRequest.getWorkDoc() != null) {
+//            personalDocumentList.add(PersonalDocument.builder()
+//                    .path(onboardingRequest.getWorkDoc())
+//                    .title("Work Authorization")
+//                    .comment("Work Authorization")
+//                    .createDate(LocalDate.now())
+//                    .build());
+//        }
+//        personalDocumentList.add(PersonalDocument.builder()
+//                .path(onboardingRequest.getDriverLicense().getLicenseDoc())
+//                .title("Driver License")
+//                .comment("Driver License")
+//                .createDate(LocalDate.now())
+//                .build());
+//        try {
+//            ResponseEntity<DtoResponse<String>> response = remoteEmployeeService.createEmployee(Employee.builder()
+//                    .userId(userId.toString())
+//                    .firstName(onboardingRequest.getFirstName())
+//                    .lastName(onboardingRequest.getLastName())
+//                    .preferredName(onboardingRequest.getPreferredName())
+//                    .email(onboardingRequest.getEmail())
+//                    .cellPhone(onboardingRequest.getCellPhone())
+//                    .alternatePhone(onboardingRequest.getWorkPhone())
+//                    .gender(onboardingRequest.getGender())
+//                    .ssn(onboardingRequest.getSsn())
+//                    .dob(onboardingRequest.getDob())
+//                    .startDate(onboardingRequest.getStartDate())
+//                    .endDate(onboardingRequest.getEndDate())
+//                    .driverLicense(onboardingRequest.getDriverLicense().getLicenseNumber())
+//                    .driverLicenseExpiration(onboardingRequest.getDriverLicense().getDriverLicenseExpiration())
+//                    .contact(onboardingRequest.getContact())
+//                    .address(addressList)
+//                    .visaStatus(visaStatusList)
+//                    .personalDocument(personalDocumentList)
+//                    .build());
+//            ApplicationWorkFlow applicationWorkFlow = ApplicationWorkFlow.builder()
+//                    .employeeId(response.getBody().getData())
+//                    .createdAt(LocalDateTime.now())
+//                    .updatedAt(LocalDateTime.now())
+//                    .status("Pending")
+//                    .comment("Awaiting HR review.")
+//                    .applicationType("Onboarding")
+//                    .build();
+//            int applicationId = applicationWorkFlowDao.add(applicationWorkFlow);
+//            personalDocumentList.forEach(
+//                    personalDocument -> {
+//                        digitalDocumentDao.add(DigitalDocument.builder()
+//                                .employeeId(response.getBody().getData())
+//                                .type(personalDocument.getTitle())
+//                                .title(personalDocument.getTitle())
+//                                .isRequired(true)
+//                                .path(personalDocument.getPath())
+//                                .description(personalDocument.getComment())
+//                                .build());
+//                    });
+//            return applicationId;
+//        } catch (Exception e){
+//            throw new EmployeeException("Failed to create onboarding application");
+//        }
+    }
+
+    private boolean checkType(String type) {
+        List<String> appTypes = new ArrayList<>();
+        appTypes.add("Onboarding");
+        appTypes.add("Visa_I983");
+        appTypes.add("Visa_OPT");
+        appTypes.add("Visa_STEM_Receipt");
+        appTypes.add("Visa_OPT_STEM_EAD");
+        if (!appTypes.contains(type)) {
+            return false;
+        }
+        return true;
     }
 
     public ResponseEntity<DtoResponse<List<Employee>>> getAllEmployee() {
@@ -149,26 +173,45 @@ public class ApplicationService {
 
 
     @Transactional
-    public void updateStatus(int applicationId, String status, Comment comment) {
-        log.info(applicationId + ":" + status + ":" + comment.getComment());
-        List<String> statusList = new ArrayList<>();
-        statusList.add("Completed");
-        statusList.add("Pending");
-        statusList.add("Approved");
-        statusList.add("Rejected");
-        if(!statusList.contains(status)) {
-            throw new StatusException("Status does not exist");
-        }else {
+    public void updateStatus(int applicationId, StatusRequest statusRequest) {
+        String status = statusRequest.getStatus();
+        if(checkStatus(status)) {
             ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
             if (!app.getStatus().equals(status) && !app.getStatus().equals("Completed")) {
-                applicationWorkFlowDao.updateStatus(applicationId, status, comment.getComment());
+                app.setStatus(status);
+                applicationWorkFlowDao.update(app);
             } else {
                 throw new StatusException("Status already exists or completed");
             }
+        } else{
+            throw new StatusException("Status is not supported");
         }
     }
 
     public List<DigitalDocument> getAllDocuments() {
         return digitalDocumentDao.getAll();
+    }
+
+    @Transactional
+    public void updateTime(int applicationId, TimeRequest timeRequest) {
+        ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
+        app.setUpdatedAt(timeRequest.getLastModificationDate());
+        applicationWorkFlowDao.update(app);
+    }
+
+    private boolean checkStatus(String status) {
+        List<String> statusList = new ArrayList<>();
+        statusList.add("Completed");
+        statusList.add("Pending");
+        statusList.add("Approved");
+        statusList.add("Rejected");
+        return statusList.contains(status);
+    }
+
+    @Transactional
+    public void updateComment(int applicationId, CommentRequest commentRequest) {
+        ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
+        app.setComment(commentRequest.getComment());
+        applicationWorkFlowDao.update(app);
     }
 }

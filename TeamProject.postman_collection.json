@@ -15,7 +15,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyb25namlUZXN0Iiwicm9sZSI6IkVNUExPWUVFIiwidXNlcklkIjoyOCwiaWF0IjoxNzUyNTkzNzUwLCJleHAiOjE3NTI2ODAxNTB9.TWhJsGm4J-86_hEthdNw9IthNCCvhB9RkAVHdofCpiY",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQcm9qZWN0SFIiLCJyb2xlIjoiSFIiLCJ1c2VySWQiOjE5LCJpYXQiOjE3NTI2OTQ2MzYsImV4cCI6MTc1Mjc4MTAzNn0.lPWx3VdMtBHL5PgQkzcMRwWjEZFA2bvDttnNcCnUaQ4",
 							"type": "string"
 						}
 					]
@@ -24,7 +24,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"firstName\": \"Alice\",\r\n  \"lastName\": \"Johnson\",\r\n  \"middleName\": \"Marie\",\r\n  \"preferredName\": \"AJ\",\r\n  \"avatar\": \"https://example.com/avatar.jpg\",\r\n  \"address\": {\r\n    \"street\": \"1234 Main Street\",\r\n    \"unit\": \"Apt 5B\",\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"zipCode\": \"10001\"\r\n  },\r\n  \"cellPhone\": \"123-456-7890\",\r\n  \"workPhone\": \"987-654-3210\",\r\n  \"email\": \"alice.johnson@example.com\",\r\n  \"gender\": \"Female\",\r\n  \"ssn\": \"123-45-6789\",\r\n  \"dob\": \"1990-05-20\",\r\n  \"startDate\": \"2025-08-01\",\r\n  \"endDate\": \"2026-08-01\",\r\n  \"visaStatus\": {\r\n    \"visaType\": \"H1B\",\r\n    \"activeFlag\": true,\r\n    \"startDate\": \"2025-07-01\",\r\n    \"endDate\": \"2026-07-01\",\r\n    \"lastModificationDate\": \"2025-07-13\"\r\n  },\r\n  \"workDoc\": \"https://example.com/docs/workdoc.pdf\",\r\n  \"driverLicense\": {\r\n    \"licenseNumber\": \"D1234567\",\r\n    \"driverLicenseExpiration\": \"2030-12-31\",\r\n    \"licenseDoc\": \"https://example.com/docs/license.pdf\"\r\n  },\r\n  \"contact\": [\r\n    {\r\n      \"firstName\": \"Bob\",\r\n      \"lastName\": \"Smith\",\r\n      \"cellPhone\": \"555-111-2222\",\r\n      \"alternatePhone\": \"555-333-4444\",\r\n      \"email\": \"bob.smith@example.com\",\r\n      \"relationship\": \"Brother\",\r\n      \"type\": \"Emergency\"\r\n    },\r\n    {\r\n      \"firstName\": \"Jane\",\r\n      \"lastName\": \"Doe\",\r\n      \"cellPhone\": \"555-555-6666\",\r\n      \"alternatePhone\": \"555-777-8888\",\r\n      \"email\": \"jane.doe@example.com\",\r\n      \"relationship\": \"Friend\",\r\n      \"type\": \"Reference\"\r\n    }\r\n  ]\r\n}\r\n",
+					"raw": "{\r\n  \"employeeId\": \"asakac45sajsncx5452s\",\r\n  \"createDate\":\"2025-07-16T14:32:00\",\r\n  \"lastModificationDate\": \"2025-07-17T09:00:00\",\r\n  \"status\": \"Pending\",\r\n  \"comment\": \"waiting for viewing\",\r\n  \"applicationType\": \"Onboarding\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -32,7 +32,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:9002/api/application/onboarding/",
+					"raw": "http://localhost:9002/api/application",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -40,9 +40,7 @@
 					"port": "9002",
 					"path": [
 						"api",
-						"application",
-						"onboarding",
-						""
+						"application"
 					]
 				}
 			},
@@ -247,6 +245,110 @@
 						"api",
 						"application",
 						"documents"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateTime",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9002/api/application/onboarding/updateTime",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9002",
+					"path": [
+						"api",
+						"application",
+						"onboarding",
+						"updateTime"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateStatus",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQcm9qZWN0SFIiLCJyb2xlIjoiSFIiLCJ1c2VySWQiOjE5LCJpYXQiOjE3NTI2OTQ2MzYsImV4cCI6MTc1Mjc4MTAzNn0.lPWx3VdMtBHL5PgQkzcMRwWjEZFA2bvDttnNcCnUaQ4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"status\": \"Rejected\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9002/api/application/1/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9002",
+					"path": [
+						"api",
+						"application",
+						"1",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateComment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQcm9qZWN0SFIiLCJyb2xlIjoiSFIiLCJ1c2VySWQiOjE5LCJpYXQiOjE3NTI2OTQ2MzYsImV4cCI6MTc1Mjc4MTAzNn0.lPWx3VdMtBHL5PgQkzcMRwWjEZFA2bvDttnNcCnUaQ4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"comment\": \"not enough info\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9002/api/application/1/comment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9002",
+					"path": [
+						"api",
+						"application",
+						"1",
+						"comment"
 					]
 				}
 			},
