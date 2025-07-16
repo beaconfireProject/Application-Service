@@ -6,12 +6,15 @@ import com.rong.applicationservice.domain.*;
 import com.rong.applicationservice.dto.request.*;
 import com.rong.applicationservice.dto.response.ApplicationDetailResponse;
 import com.rong.applicationservice.dto.response.DtoResponse;
+import com.rong.applicationservice.exception.AuthorizationNotFoundException;
 import com.rong.applicationservice.exception.EmployeeException;
 import com.rong.applicationservice.exception.StatusException;
 import com.rong.applicationservice.service.remote.RemoteEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -213,5 +216,33 @@ public class ApplicationService {
         ApplicationWorkFlow app = applicationWorkFlowDao.findById(applicationId);
         app.setComment(commentRequest.getComment());
         applicationWorkFlowDao.update(app);
+    }
+
+    public ApplicationWorkFlow checkApplication(String empId) {
+        List<ApplicationWorkFlow> list = applicationWorkFlowDao.getAnyNonCompletedByEmpId(empId);
+        return list.isEmpty()? null : list.get(0);
+    }
+
+    private Long getUserId(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            Object userIdObj = auth.getDetails();
+            if (userIdObj instanceof Long) {
+                Long userId = (Long) userIdObj;
+                log.info("User ID from JWT token: {}", userId);
+                return userId;
+            } else {
+                throw new AuthorizationNotFoundException("No User ID from JWT token");
+            }
+        } else {
+            throw new AuthorizationNotFoundException("No user found in the authentication");
+        }
+    }
+
+    public ApplicationWorkFlow checkApplicationByEmp() {
+        Long userId = getUserId();
+        ResponseEntity<DtoResponse<Employee>> res = getEmployeeById(userId.toString());
+        Employee employee = res.getBody().getData();
+        return checkApplication(employee.getId());
     }
 }

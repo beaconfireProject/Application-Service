@@ -198,4 +198,40 @@ public class ApplicationController {
                 .message("get all documents successfully")
                 .build();
     }
+
+    @GetMapping("/check/{empId}")
+    @PreAuthorize("hasAuthority('HR')")
+    public GeneralResponse checkApplication(@PathVariable String empId) {
+        ApplicationWorkFlow existApplication = applicationService.checkApplication(empId);
+        String message;
+        if(existApplication == null) {
+            message = "Ongoing Application does not exist";
+        } else {
+            message = "Get Ongoing Application successfully";
+        }
+        return ResponseSuccess.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .data(existApplication)
+                .message(message)
+                .build();
+    }
+
+    @GetMapping("/check")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    public GeneralResponse checkApplicationByEmp() {
+        ApplicationWorkFlow applicationWorkFlow = applicationService.checkApplicationByEmp();
+        String message;
+        if(applicationWorkFlow == null) {
+            message = "Ongoing Application does not exist";
+        } else {
+            message = "Get Ongoing Application successfully";
+        }
+        return ResponseSuccess.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .data(applicationWorkFlow)
+                .message(message)
+                .build();
+    }
 }

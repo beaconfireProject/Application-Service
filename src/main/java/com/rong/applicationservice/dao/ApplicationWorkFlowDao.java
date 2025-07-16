@@ -6,6 +6,7 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWorkFlow> {
@@ -32,5 +33,14 @@ public class ApplicationWorkFlowDao extends AbstractHibernateDao<ApplicationWork
     public void update(ApplicationWorkFlow app) {
         Session session = getCurrentSession();
         session.update(app);
+    }
+
+    public List<ApplicationWorkFlow> getAnyNonCompletedByEmpId(String id) {
+        Session session = getCurrentSession();
+        String hql = "from ApplicationWorkFlow where employeeId=:id and status<> :status";
+        Query<ApplicationWorkFlow> query = session.createQuery(hql);
+        query.setParameter("id", id);
+        query.setParameter("status", "Completed");
+        return query.getResultList();
     }
 }

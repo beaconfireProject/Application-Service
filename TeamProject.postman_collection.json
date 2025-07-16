@@ -353,6 +353,69 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "checkAppByHR",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQcm9qZWN0SFIiLCJyb2xlIjoiSFIiLCJ1c2VySWQiOjE5LCJpYXQiOjE3NTI2OTQ2MzYsImV4cCI6MTc1Mjc4MTAzNn0.lPWx3VdMtBHL5PgQkzcMRwWjEZFA2bvDttnNcCnUaQ4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9002/api/application/check/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9002",
+					"path": [
+						"api",
+						"application",
+						"check",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CheckAPPByEmployee",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBYiIsInJvbGUiOiJFTVBMT1lFRSIsInVzZXJJZCI6MTUsImlhdCI6MTc1MjY5NDcyMywiZXhwIjoxNzUyNzgxMTIzfQ.ZUtRr_W9oFkx5CbyE_Ie-sGyhTAt2D_214-qvQ249Ns",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9002/api/application/check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9002",
+					"path": [
+						"api",
+						"application",
+						"check"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
