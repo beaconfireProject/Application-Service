@@ -52,7 +52,7 @@ public class ApplicationController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/onboarding")
     @PreAuthorize("hasAuthority('EMPLOYEE')")
     public GeneralResponse createOnboardingApplication(@RequestBody OnboardingRequest onboardingRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
